@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+</head>
+<body>
+
+    <h1>URL Shortener</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <input
+            type="url"
+            name="url"
+            placeholder="Paste your long URL here"
+            required
+            style="width:400px;"
+        >
+        <button type="submit">Shorten</button>
+    </form>
+
+    {% if short %}
+        <hr>
+
+        <h3>Short URL Created</h3>
+
+        <p>
+            <strong>Original URL:</strong><br>
+            <a href="{{ short.original_url }}" target="_blank">
+                {{ short.original_url }}
+            </a>
+        </p>
+
+        <p>
+            <strong>Short URL:</strong><br>
+            <a href="{{ full_url }}" target="_blank">
+                {{ full_url }}
+            </a>
+        </p>
+
+        <p>
+            <strong>Clicks:</strong> {{ short.clicks }}
+        </p>
+
+    {% endif %}
+
+    <hr>
+
+    <a href="{% url 'stats' %}">
+        View All Shortened URLs
+    </a>
+
+</body>
+</html>
