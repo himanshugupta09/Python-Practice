@@ -14,22 +14,19 @@
     </div>
     {% endif %}
     <form method="POST">
-        {% csrf_token %}
-        <input
-            type="url"
-            name="url"
-            placeholder="Paste your long URL here"
-            required
-            style="width:400px;"
-        >
-        <input 
-            type="text"
-            name="custom_alias"
-            placeholder="Custom alias (optional)"
-            style="width:200px;"
-        >
-        <button type="submit">Shorten</button>
-    </form>
+    {% csrf_token %}
+    <input type="url" name="url" placeholder="Paste your long URL" required>
+    <input type="text" name="custom_code" placeholder="Custom alias (optional)">
+    
+    <select name="expiry">
+        <option value="never">Never expires</option>
+        <option value="1">1 day</option>
+        <option value="7">7 days</option>
+        <option value="30">30 days</option>
+    </select>
+    
+    <button type="submit">Shorten</button>
+</form>
 
     {% if short %}
         <hr>

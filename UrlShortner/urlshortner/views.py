@@ -1,11 +1,15 @@
 import re
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import URLShortner
+from django.utils import timezone
+from django.db.models import Q
+
 
 def home(request):
     if request.method == "POST":
         original_url = request.POST.get("url")
-        custom_alias = request.POST.get("custom_alias","").strip()
+        custom_alias = request.POST.get("custom_code","").strip()
+        expiry_choice = request.POST.get("expiry")
         if custom_alias:
             if not re.match(r'^[A-Za-z0-9_-]+$', custom_alias):
                 return render(request, "home.html", {
@@ -25,27 +29,29 @@ def home(request):
             while URLShortner.objects.filter(short_url=short_url).exists():
                 short_url = URLShortner.generate_short_url()
 
+        expires_at = None
+        if expiry_choice != 'never':
+            expires_at = timezone.now() + timezone.timedelta(days=int(expiry_choice))
         short = URLShortner.objects.create(
-            original_url=original_url,
-            short_url=short_url
+            original_url = original_url,
+            short_url = short_url,
+            expires_at = expires_at
         )
-
-        full_url = request.build_absolute_uri(f"/{short.short_url}")
-
-        return render(request, "home.html", {
-            "short": short,
-            "full_url": full_url
-        })
-
-    return render(request, "home.html")
+        return render(request,"home.html", {"short_url": short.short_url})
+    return render(request,"home.html")
 
 def redirect_to_original(request, short_url):
-    url = get_object_or_404(URLShortner, short_url=short_url)
-    url.clicks += 1
-    url.save()
-    return redirect(url.original_url)
+    short = get_object_or_404(URLShortner, short_url=short_url)
+    if short.is_expired():
+        return render(request,'expired.hmtl',status=410)
+    short.click_count += 1
+    short.save()
+    return redirect(short.original_url)
+
 def stats(request):
-    urls = URLShortner.objects.all()
+    urls =  URLShortner.objects.filter(
+        Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now())
+    )
     return render(request, "stats.html", {"urls": urls})
 
 # Create your views here.

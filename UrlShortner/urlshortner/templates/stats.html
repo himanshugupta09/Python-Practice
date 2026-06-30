@@ -16,8 +16,8 @@
         <th>Clicks</th>
         <th>Created</th>
     </tr>
-
     {% for url in urls %}
+    {% if not url.is_expired %}
     <tr>
         <td>
             <a href="/{{ url.short_url }}">
@@ -31,10 +31,10 @@
             </a>
         </td>
 
-        <td>{{ url.clicks }}</td>
-
-        <td>{{ url.created_at|date:"d M Y H:i" }}</td>
-    </tr>
+            <td>{{ url.clicks }}</td>
+            <td>{{ url.created_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% endif %}
     {% empty %}
     <tr>
         <td colspan="4">No URLs yet.</td>
