@@ -4,6 +4,15 @@ import string
 from datetime import timedelta
 from django.utils import timezone
 # Create your models here.
+class URLShortnerManager(models.Manager):
+
+    def active_urls(self):
+        return self.filter(
+            is_expired=False
+        ).filter(
+            models.Q(expires_at__isnull=True) |
+            models.Q(expires_at__gt=timezone.now())
+        )
 class URLShortner(models.Model):
     original_url = models.URLField(max_length=200)
     short_url = models.CharField(max_length=50,unique=True)
@@ -11,6 +20,10 @@ class URLShortner(models.Model):
     expires_at = models.DateTimeField(null = True, blank = True)
     is_expired = models.BooleanField(default=False)
     clicks = models.IntegerField(default=0)
+    qr_code = models.ImageField(upload_to='qr_codes/', null=True, blank=True)
+
+
+    objects = URLShortnerManager()
 
     @staticmethod
     def generate_short_url():
