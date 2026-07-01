@@ -42,9 +42,10 @@ def home(request):
 
 def redirect_to_original(request, short_url):
     short = get_object_or_404(URLShortner, short_url=short_url)
-    if short.is_expired():
+    print(short.__dict__)
+    if short.is_expired:
         return render(request,'expired.hmtl',status=410)
-    short.click_count += 1
+    short.clicks += 1
     short.save()
     return redirect(short.original_url)
 
